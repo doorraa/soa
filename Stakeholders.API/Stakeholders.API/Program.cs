@@ -13,7 +13,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddHttpClient("FollowersAPI", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5289");
+    client.BaseAddress = new Uri("http://followers-api:80");
 });
 
 builder.Services.AddScoped<FollowersService>();
@@ -106,5 +106,21 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<StakeholdersDbContext>();
+        context.Database.Migrate(); // ??????? ??? ?????????
+
+        Console.WriteLine("? Database migrations applied successfully!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"? Error applying migrations: {ex.Message}");
+    }
+}
 
 app.Run();

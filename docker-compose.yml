@@ -1,0 +1,120 @@
+version: '3.8'
+
+services:
+  # PostgreSQL baza za Stakeholders
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: stakeholders
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  # Neo4j baza za Followers
+  neo4j:
+    image: neo4j:latest
+    container_name: neo4j
+    environment:
+      NEO4J_AUTH: neo4j/password123
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+    networks:
+      - app-network
+
+  # MongoDB baza za Tours
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+
+  # Stakeholders API
+  stakeholders-api:
+    build:
+      context: ./Stakeholders.API/Stakeholders.API
+      dockerfile: Dockerfile
+    container_name: stakeholders-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:80
+    ports:
+      - "5001:80"
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  # Followers API
+  followers-api:
+    build:
+      context: ./Followers.API/Followers.API
+      dockerfile: Dockerfile
+    container_name: followers-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:80
+    ports:
+      - "5002:80"
+    depends_on:
+      - neo4j
+    networks:
+      - app-network
+
+  # Tours API
+  tours-api:
+    build:
+      context: ./Tours.API/Tours.API
+      dockerfile: Dockerfile
+    container_name: tours-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:80
+    ports:
+      - "5003:80"
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
+
+  # API Gateway
+  gateway:
+    build:
+      context: ./Gateway
+      dockerfile: Dockerfile
+    container_name: gateway
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:80
+    ports:
+      - "5000:80"
+    depends_on:
+      - stakeholders-api
+      - followers-api
+      - tours-api
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  neo4j_data:
+  mongodb_data:
