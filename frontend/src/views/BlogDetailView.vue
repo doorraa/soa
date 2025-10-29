@@ -28,7 +28,7 @@
         
         <div v-else>
           <div v-for="comment in comments" :key="comment.id" class="comment">
-            <div class="comment-author">{{ comment.username }}</div>
+            <div class="comment-author">@{{ comment.username }}</div>
             <div class="comment-date">{{ new Date(comment.createdAt).toLocaleString() }}</div>
             <div>{{ comment.content }}</div>
           </div>

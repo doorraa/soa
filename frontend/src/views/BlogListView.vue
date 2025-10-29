@@ -8,18 +8,38 @@
         </router-link>
       </div>
       
+      <!-- Tabs -->
+      <div class="flex gap-10 mt-20" style="border-bottom: 2px solid #ddd; padding-bottom: 10px;">
+        <button 
+          @click="activeTab = 'feed'" 
+          class="btn"
+          :class="activeTab === 'feed' ? 'btn-primary' : 'btn-secondary'"
+        >
+          Feed
+        </button>
+        <button 
+          @click="activeTab = 'my'" 
+          class="btn"
+          :class="activeTab === 'my' ? 'btn-primary' : 'btn-secondary'"
+        >
+          My Blogs
+        </button>
+      </div>
+      
       <div v-if="loading" class="loading">Loading...</div>
       
-      <div v-else-if="blogs.length === 0" class="empty-state">
-        No blogs yet. Create your first blog!
+      <div v-else-if="displayedBlogs.length === 0" class="empty-state">
+        {{ activeTab === 'feed' ? 'No blogs in your feed yet' : 'No blogs yet. Create your first blog!' }}
       </div>
       
       <div v-else class="card-grid">
-        <div v-for="blog in blogs" :key="blog.id" class="card">
+        <div v-for="blog in displayedBlogs" :key="blog.id" class="card">
           <h3>{{ blog.title }}</h3>
           <p>By {{ blog.username }}</p>
           <p>{{ blog.description.substring(0, 100) }}...</p>
-          <p class="text-muted">{{ new Date(blog.createdAt).toLocaleDateString() }}</p>
+          <p style="color: #7f8c8d; font-size: 14px;">
+            {{ new Date(blog.createdAt).toLocaleDateString() }} • {{ blog.commentCount }} comments
+          </p>
           
           <router-link :to="`/blog/${blog.id}`">
             <button class="btn btn-primary mt-20">Read More</button>
@@ -31,21 +51,33 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useBlogStore } from '@/stores/blog'
 
 const blogStore = useBlogStore()
 
-const blogs = ref([])
+const feedBlogs = ref([])
+const myBlogs = ref([])
 const loading = ref(true)
+const activeTab = ref('feed')
+
+const displayedBlogs = computed(() => {
+  return activeTab.value === 'feed' ? feedBlogs.value : myBlogs.value
+})
 
 onMounted(async () => {
+  await loadBlogs()
+})
+
+const loadBlogs = async () => {
+  loading.value = true
   try {
-    blogs.value = await blogStore.getMyBlogs()
+    feedBlogs.value = await blogStore.getFeed()
+    myBlogs.value = await blogStore.getMyBlogs()
   } catch (err) {
     console.error(err)
   } finally {
     loading.value = false
   }
-})
+}
 </script>

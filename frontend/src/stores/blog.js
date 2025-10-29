@@ -79,6 +79,15 @@ export const useBlogStore = defineStore('blog', {
       } catch (error) {
         throw error.response?.data || error.message
       }
+    },
+
+    async getFeed() {
+    try {
+        const response = await api.get('/blog/feed')
+        return response.data
+    } catch (error) {
+        throw error.response?.data || error.message
+    }
     }
   }
 })

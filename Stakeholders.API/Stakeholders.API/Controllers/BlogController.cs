@@ -300,5 +300,33 @@ namespace Stakeholders.API.Controllers
             }
             return string.Empty;
         }
+
+        // GET: api/blog/feed
+        [HttpGet("feed")]
+        public async Task<ActionResult<List<BlogDto>>> GetFeed()
+        {
+            var userId = GetCurrentUserId();
+
+            // Za sada vraća sve blogove - možeš dodati logiku za following kasnije
+            var blogs = await _context.Blogs
+                .Include(b => b.User)
+                .Include(b => b.Comments)
+                .OrderByDescending(b => b.CreatedAt)
+                .Take(50)
+                .Select(b => new BlogDto
+                {
+                    Id = b.Id,
+                    UserId = b.UserId,
+                    Username = b.User.Username,
+                    Title = b.Title,
+                    Description = b.Description,
+                    CreatedAt = b.CreatedAt,
+                    ImageUrls = b.ImageUrls,
+                    CommentCount = b.Comments.Count
+                })
+                .ToListAsync();
+
+            return Ok(blogs);
+        }
     }
 }

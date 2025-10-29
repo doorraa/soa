@@ -110,5 +110,35 @@ namespace Stakeholders.API.Controllers
                 ProfilePictureUrl = profile.ProfilePictureUrl
             });
         }
+
+        // GET: api/profile/search?username=test
+        [HttpGet("search")]
+        [AllowAnonymous]
+        public async Task<ActionResult<List<UserProfileDto>>> SearchUsers(string username)
+        {
+            if (string.IsNullOrEmpty(username) || username.Length < 2)
+            {
+                return BadRequest(new { message = "Username must be at least 2 characters" });
+            }
+
+            var users = await _context.Users
+                .Include(u => u.Profile)
+                .Where(u => u.Username.ToLower().Contains(username.ToLower()))
+                .Take(10) // Limit to 10 results
+                .Select(u => new UserProfileDto
+                {
+                    UserId = u.Id,
+                    Username = u.Username,
+                    FirstName = u.Profile != null ? u.Profile.FirstName : "",
+                    LastName = u.Profile != null ? u.Profile.LastName : "",
+                    Bio = u.Profile != null ? u.Profile.Bio : "",
+                    Motto = u.Profile != null ? u.Profile.Motto : "",
+                    ProfilePictureUrl = u.Profile != null ? u.Profile.ProfilePictureUrl : ""
+                })
+                .ToListAsync();
+
+            return Ok(users);
+        }
+
     }
 }

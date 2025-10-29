@@ -34,6 +34,15 @@ export const useProfileStore = defineStore('profile', {
       } catch (error) {
         throw error.response?.data || error.message
       }
+    },
+
+    async searchUsers(username) {
+        try {
+            const response = await api.get(`/profile/search?username=${username}`)
+            return response.data
+        } catch (error) {
+            throw error.response?.data || error.message
+        }
     }
   }
 })
