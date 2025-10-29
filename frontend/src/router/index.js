@@ -8,14 +8,14 @@ import BlogListView from '@/views/BlogListView.vue'
 import BlogDetailView from '@/views/BlogDetailView.vue'
 import CreateBlogView from '@/views/CreateBlogView.vue'
 import FollowersView from '@/views/FollowersView.vue'
-/*import ToursView from '@/views/ToursView.vue'
+import ToursView from '@/views/ToursView.vue'
 import TourDetailView from '@/views/TourDetailView.vue'
 import CreateTourView from '@/views/CreateTourView.vue'
 import MyToursView from '@/views/MyToursView.vue'
 import PositionSimulatorView from '@/views/PositionSimulatorView.vue'
 import ShoppingCartView from '@/views/ShoppingCartView.vue'
 import TourExecutionView from '@/views/TourExecutionView.vue'
-*/
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -64,7 +64,7 @@ const router = createRouter({
       component: FollowersView,
       meta: { requiresAuth: true }
     },
-   /* {
+    {
       path: '/tours',
       name: 'tours',
       component: ToursView
@@ -103,7 +103,7 @@ const router = createRouter({
       name: 'tour-execution',
       component: TourExecutionView,
       meta: { requiresAuth: true }
-    }*/
+    }
   ]
 })
 
